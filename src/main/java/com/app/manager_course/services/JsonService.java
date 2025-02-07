@@ -8,17 +8,18 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class JsonService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private UniversityData readJsonFile(String filePath) throws IOException {
+    public UniversityData readJsonFile(String filePath) throws IOException {
         return objectMapper.readValue(new File(filePath), UniversityData.class);
     }
 
-    private void writeJsonFile(String filePath, UniversityData data) throws IOException {
+    public void writeJsonFile(String filePath, UniversityData data) throws IOException {
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(filePath), data);
     }
 
@@ -52,4 +53,23 @@ public class JsonService {
 
         writeJsonFile(filePath, data);
     }
+
+    public void deleteStudent(String id, String filePath) throws IOException {
+        UniversityData data = readJsonFile(filePath);
+
+        List<Student> updatedStudents = data.getStudents().stream()
+                .filter(stu -> !stu.getId().equals(id)) // ลบนักศึกษาที่มี ID ตรงกับที่กำหนด
+                .collect(Collectors.toList());
+
+        if (updatedStudents.size() == data.getStudents().size()) {
+            System.out.println("Student not found: " + id);
+            return;
+        }
+
+        data.setStudents(updatedStudents);
+        writeJsonFile(filePath, data);
+
+        System.out.println("Student deleted successfully: " + id);
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.app.manager_course.models;
 
+import jakarta.annotation.Nullable;
 import lombok.Data;
 
 @Data
