@@ -19,16 +19,15 @@ public class UniversityController {
     @Autowired
     private JsonService jsonService;
 
-    @Value("${upload-dir}") // 📌 ดึง path ของโฟลเดอร์ที่เก็บไฟล์ JSON
+    @Value("${upload-dir}")
     private String pathDir;
 
-    private final String fileName = "npru_course_se_53.json"; // 📌 ชื่อไฟล์ JSON
+    private final String fileName = "npru_course_se_53.json";
 
-    // 📌 GET นักเรียนทั้งหมด
     @GetMapping("/getAll")
     public ResponseEntity<List<Student>> getAllStudents() {
         try {
-            File file = new File(pathDir, fileName); // ✅ อ่านไฟล์ JSON
+            File file = new File(pathDir, fileName);
             List<Student> students = jsonService.findAllStudent(file.getAbsolutePath());
             return ResponseEntity.ok(students);
         } catch (IOException e) {
@@ -36,7 +35,6 @@ public class UniversityController {
         }
     }
 
-    // 📌 GET นักเรียนจาก ID
     @GetMapping("/student/{id}")
     public ResponseEntity<Student> getStudent(@PathVariable("id") String id) {
         try {
@@ -48,27 +46,25 @@ public class UniversityController {
         }
     }
 
-    // 📌 POST เพิ่มนักเรียนใหม่
     @PostMapping("/addStudent")
     public ResponseEntity<String> addStudent(@RequestBody Student student) {
         try {
             File file = new File(pathDir, fileName);
             jsonService.addStudentToJsonFile(file.getAbsolutePath(), student);
-            return ResponseEntity.ok("✅ Student added successfully!");
+            return ResponseEntity.ok("Student added successfully!");
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Error adding student");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error adding student");
         }
     }
 
-    // 📌 PUT อัปเดตนักเรียน
     @PutMapping("/updateStudent/{id}")
     public ResponseEntity<String> updateStudent(@PathVariable("id") String id, @RequestBody Student student) {
         try {
             File file = new File(pathDir, fileName);
             jsonService.updateStudent(id, file.getAbsolutePath(), student);
-            return ResponseEntity.ok("✅ Student updated successfully!");
+            return ResponseEntity.ok("Student updated successfully!");
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Error updating student");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating student");
         }
     }
 }
