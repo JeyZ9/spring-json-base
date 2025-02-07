@@ -16,6 +16,7 @@ import java.util.List;
 @RequestMapping("/api")
 public class UniversityController {
 
+
     @Autowired
     private JsonService jsonService;
 
