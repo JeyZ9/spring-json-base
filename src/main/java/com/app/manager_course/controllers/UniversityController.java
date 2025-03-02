@@ -21,6 +21,10 @@ public class UniversityController {
     @Autowired
     private JsonService jsonService;
 
+    public UniversityController(JsonService jsonService) {
+        this.jsonService = jsonService;
+    }
+
     @Value("${upload-dir}")
     private String pathDir;
 
