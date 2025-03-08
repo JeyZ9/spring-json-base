@@ -1,12 +1,18 @@
 package com.app.manager_course.services;
 
+import com.app.manager_course.dto.StudentDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.app.manager_course.models.Student;
 import com.app.manager_course.models.UniversityData;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,51 +20,72 @@ import java.util.stream.Collectors;
 public class JsonService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final String fileName = "./uploads/npru_course_se_53.json";
 
-    public UniversityData readJsonFile(String filePath) throws IOException {
-        return objectMapper.readValue(new File(filePath), UniversityData.class);
+    public UniversityData readJsonFile() throws IOException {
+        File file = new File(fileName);
+        if (!file.exists()) {
+            throw new IOException("File not found: " + fileName);
+        }
+        return objectMapper.readValue(file, UniversityData.class);
     }
 
-    public void writeJsonFile(String filePath, UniversityData data) throws IOException {
-        objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(filePath), data);
+    public void writeJsonFile(UniversityData data) throws IOException {
+        File file = new File(fileName);
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(file, data);
     }
 
-    public List<Student> findAllStudent(String filePath) throws IOException {
-        return readJsonFile(filePath).getStudents();
+    public List<Student> findAllStudents() throws IOException {
+        return readJsonFile().getStudents();
     }
 
-    public Student findStudentById(String id, String filePath) throws IOException {
-        return readJsonFile(filePath).getStudents().stream()
+    public Student findStudentById(String id) throws IOException {
+        return readJsonFile().getStudents().stream()
                 .filter(student -> student.getId().equals(id))
                 .findFirst()
                 .orElse(null);
     }
 
-    public void addStudentToJsonFile(String filePath, Student student) throws IOException {
-        UniversityData data = readJsonFile(filePath);
-        data.getStudents().add(student);
-        writeJsonFile(filePath, data);
+    public StudentDTO getStudents(int page, int size) throws IOException {
+        List<Student> students = findAllStudents();
+        Pageable pageable = PageRequest.of(page, size);
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), students.size());
+
+        List<Student> paginatedList = students.subList(start, end);
+        Page<Student> studentPage = new PageImpl<>(paginatedList, pageable, students.size());
+
+        StudentDTO studentDTO = new StudentDTO();
+        studentDTO.setStudents(studentPage.getContent());
+        studentDTO.setPage(page);
+        studentDTO.setSize(size);
+        return studentDTO;
     }
 
-    public void updateStudent(String id, String filePath, Student updatedStudent) throws IOException {
-        UniversityData data = readJsonFile(filePath);
+    public void addStudentToJsonFile(Student student) throws IOException {
+        UniversityData data = readJsonFile();
+        data.getStudents().add(student);
+        writeJsonFile(data);
+    }
+
+    public void updateStudent(String id, Student student) throws IOException {
+        UniversityData data = readJsonFile();
         List<Student> students = data.getStudents();
 
         for (Student stu : students) {
             if (stu.getId().equals(id)) {
-                stu.setName(updatedStudent.getName());
+                stu.setName(student.getName());
                 break;
             }
         }
 
-        writeJsonFile(filePath, data);
+        writeJsonFile(data);
     }
 
-    public void deleteStudent(String id, String filePath) throws IOException {
-        UniversityData data = readJsonFile(filePath);
-
+    public void deleteStudent(String id) throws IOException {
+        UniversityData data = readJsonFile();
         List<Student> updatedStudents = data.getStudents().stream()
-                .filter(stu -> !stu.getId().equals(id)) // ลบนักศึกษาที่มี ID ตรงกับที่กำหนด
+                .filter(stu -> !stu.getId().equals(id))
                 .collect(Collectors.toList());
 
         if (updatedStudents.size() == data.getStudents().size()) {
@@ -67,9 +94,7 @@ public class JsonService {
         }
 
         data.setStudents(updatedStudents);
-        writeJsonFile(filePath, data);
-
+        writeJsonFile(data);
         System.out.println("Student deleted successfully: " + id);
     }
-
 }

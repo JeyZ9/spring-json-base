@@ -1,5 +1,6 @@
 package com.app.manager_course.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,13 +8,14 @@ import java.util.List;
 
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UniversityData {
     private String university;
     private String system;
     private AcademicSemester academic_semester;
     private Course course;
     private List<Student> students;
-    private String page;
+//    private String page;
 
 //    // Getter & Setter
 //    public String getUniversity() { return university; }
