@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/students")
+@CrossOrigin("http://localhost:5173")
 public class UniversityController {
 
     private final JsonService jsonService;
@@ -36,9 +37,10 @@ public class UniversityController {
 
     @GetMapping("/search")
     public ResponseEntity<StudentDTO> searchStudents(
+            @RequestParam(defaultValue = "") String keyword,
             @RequestParam(defaultValue = "0", name = "page") int page,
             @RequestParam(defaultValue = "10", name = "size") int size) throws IOException {
-        return ResponseEntity.ok(jsonService.getStudents(page, size));
+        return ResponseEntity.ok(jsonService.getStudents(keyword, page, size));
     }
 
     @PostMapping("/create")
