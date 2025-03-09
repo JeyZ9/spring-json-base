@@ -26,8 +26,8 @@ public class UniversityController {
         return ResponseEntity.ok(jsonService.findAllStudents());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Student> getStudentById(@PathVariable String id) throws IOException {
+    @GetMapping("/student")
+    public ResponseEntity<Student> getStudentById(@RequestParam String id) throws IOException {
         Student student = jsonService.findStudentById(id);
         if (student == null) {
             return ResponseEntity.notFound().build();
