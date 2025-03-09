@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,11 +47,17 @@ public class JsonService {
                 .orElse(null);
     }
 
-    public StudentDTO getStudents(int page, int size) throws IOException {
-        List<Student> students = findAllStudents();
+    public StudentDTO getStudents(String keyword, int page, int size) throws IOException {
+        List<Student> students = new ArrayList<>();
+        students = findAllStudents();
+        if (keyword != "" && !keyword.isEmpty()){
+            students = students.stream().filter(stu -> stu.getName().toLowerCase().contains(keyword.toLowerCase()) || stu.getId().contains(keyword)).collect(Collectors.toList());
+        }
+
         Pageable pageable = PageRequest.of(page, size);
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), students.size());
+        int total = students.size();
 
         List<Student> paginatedList = students.subList(start, end);
         Page<Student> studentPage = new PageImpl<>(paginatedList, pageable, students.size());
@@ -59,6 +66,7 @@ public class JsonService {
         studentDTO.setStudents(studentPage.getContent());
         studentDTO.setPage(page);
         studentDTO.setSize(size);
+        studentDTO.setTotal(total);
         return studentDTO;
     }
 

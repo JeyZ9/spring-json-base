@@ -19,9 +19,13 @@ public class StudentDTO {
     @Min(1)
     private int size;
 
-    public StudentDTO(List<Student> students, int page, int size) {
+    @Min(0)
+    private int total;
+
+    public StudentDTO(List<Student> students, int page, int size, int total) {
         this.students = students;
         this.page = page;
         this.size = size;
+        this.total = total;
     }
 }
